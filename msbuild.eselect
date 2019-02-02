@@ -8,8 +8,8 @@ MAINTAINER="dotnet@gentoo.org"
 # find a list of symlink targets
 find_targets() {
     local f
-    for f in "${EROOT}"/usr/bin/msbuild-*; do
-        [[ -d ${f} ]] && basename "${f}"
+    for f in "${EROOT}"/usr/bin/msbuild-[[:digit:]]*; do
+        [[ -f ${f} ]] && basename "${f}"
     done
 }
 
