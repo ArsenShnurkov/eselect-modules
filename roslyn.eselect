@@ -18,7 +18,7 @@ EOF
 }
 
 # echoes $2 if $1 exists on disk
-check_target() {
+check_and_echo() {
     [[ -f ${1} ]] && echo ${2}
 }
 
