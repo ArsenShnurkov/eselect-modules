@@ -45,7 +45,7 @@ set_target() {
         target=${targets[target-1]}
     fi
 
-    [[ -z ${target} || ! -f ${EROOT}/usr/bin/${target} ]] \
+    [[ -z ${target} || ! -f ${EROOT}/${target} ]] \
         && die -q "Target \"$1\" doesn't appear to be valid!"
 
     make_wrapper ${target}
