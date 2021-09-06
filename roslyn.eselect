@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU GPL version 2 or later
 
 DESCRIPTION="Manage the /usr/bin/csc.exe script"
-VERSION="202100830"
+VERSION="202100904"
 MAINTAINER="dotnet@gentoo.org"
 
 # $ cat /usr/bin/csc
@@ -13,8 +13,34 @@ MAINTAINER="dotnet@gentoo.org"
 make_wrapper() {
 	cat << EOF > /usr/bin/csc
 #!/bin/bash
-exec /usr/bin/mono --gc-params=nursery-size=64m $MONO_OPTIONS $1 "$@"
+exec /usr/bin/mono --gc-params=nursery-size=64m $MONO_OPTIONS $1 "\$@"
 EOF
+}
+
+# split string (first argument) into parts and get the name of executable
+get_internal_path() {
+    local prev_word=""
+    for word in $1;
+    do
+         if [ "${word}" = '"$@"' ]; then
+		echo ${prev_word};
+	fi
+	prev_word=${word}
+    done
+}
+
+# read file and parse out the name of executable
+find_current_target() {
+    input=$1
+    while IFS= read -r line
+    do
+	if [[ ${line} == *"\$@"* ]]; then
+            # get one word before $@
+            name=$(get_internal_path "${line}")
+            # output if not empty
+            [[ ! -z "$name" ]] && echo "$name"
+        fi
+    done < "$input"
 }
 
 # echoes $2 if $1 exists on disk
@@ -26,8 +52,8 @@ check_and_echo() {
 find_targets() {
     local f
     check_and_echo "${EROOT}/usr/lib/mono/4.5/csc.exe" "${EROOT}/usr/lib/mono/4.5/csc.exe"
-    for f in "${EROOT}"/usr/roslyn/x86_64-msbin-linux/roslyn/*; do
-        check_and_echo "${f}" $(basename "${f}")
+    for f in "${EROOT}"/usr/x86_64-msbin-roslyn/*/csc.exe; do
+        check_and_echo "${f}" "${f}"
     done
 }
 
@@ -75,12 +101,12 @@ describe_list() {
 
 do_list() {
     local i targets=( $(find_targets) )
+    local curtar="$(find_current_target /usr/bin/csc)"
 
     write_list_start "Available msbuild symlink targets:"
     for (( i = 0; i < ${#targets[@]}; i++ )); do
         # highlight the target where the symlink is pointing to
-        [[ ${targets[i]} = \
-            $(basename "$(canonicalise "${EROOT}/usr/bin/msbuild")") ]] \
+        [[ ${targets[i]} = ${curtar} ]] \
             && targets[i]=$(highlight_marker "${targets[i]}")
     done
     write_numbered_list -m "(none found)" "${targets[@]}"
