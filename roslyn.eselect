@@ -1,9 +1,11 @@
 # Copyright 1999-2021 Gentoo Foundation
 # Distributed under the terms of the GNU GPL version 2 or later
 
-DESCRIPTION="Manage the /usr/bin/csc.exe script"
-VERSION="202100904"
+DESCRIPTION="Manage the /usr/local/bin/csc script"
+VERSION="202100906"
 MAINTAINER="dotnet@gentoo.org"
+
+CSC_PATH=/usr/bin/csc
 
 # $ cat /usr/bin/csc
 # #!/bin/sh
@@ -11,7 +13,7 @@ MAINTAINER="dotnet@gentoo.org"
 
 # create the wrapper
 make_wrapper() {
-	cat << EOF > /usr/bin/csc
+	cat << EOF > #{CSC_PATH}
 #!/bin/bash
 exec /usr/bin/mono --gc-params=nursery-size=64m $MONO_OPTIONS $1 "\$@"
 EOF
@@ -59,7 +61,7 @@ find_targets() {
 
 # remove the wrapper
 remove_target() {
-    rm "${EROOT}/usr/bin/csc.exe"
+    rm "${EROOT}${CSC_PATH}"
 }
 
 # create new record
@@ -85,8 +87,8 @@ describe_show() {
 
 do_show() {
     write_list_start "Current selection:"
-    if [[ -L ${EROOT}/usr/bin/csc ]]; then
-        local version=$(canonicalise "${EROOT}/usr/bin/csc")
+    if [[ -L ${EROOT}${CSC_PATH} ]]; then
+        local version=$(canonicalise "${EROOT}${CSC_PATH}")
         write_kv_list_entry "${version%/}" ""
     else
         write_kv_list_entry "(unset)" ""
@@ -101,7 +103,7 @@ describe_list() {
 
 do_list() {
     local i targets=( $(find_targets) )
-    local curtar="$(find_current_target /usr/bin/csc)"
+    local curtar="$(find_current_target ${CSC_PATH})"
 
     write_list_start "Available msbuild symlink targets:"
     for (( i = 0; i < ${#targets[@]}; i++ )); do
