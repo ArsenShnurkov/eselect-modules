@@ -5,7 +5,8 @@ DESCRIPTION="Manage the /usr/local/bin/csc script"
 VERSION="202100906"
 MAINTAINER="dotnet@gentoo.org"
 
-CSC_PATH=/usr/bin/csc
+WRAPPER_NAME=/usr/bin/csc
+INSTALL_PATH=/usr/lib/x86_64-msbin-roslyn
 
 # $ cat /usr/bin/csc
 # #!/bin/sh
@@ -13,7 +14,7 @@ CSC_PATH=/usr/bin/csc
 
 # create the wrapper
 make_wrapper() {
-	cat << EOF > ${CSC_PATH}
+	cat << EOF > ${WRAPPER_NAME}
 #!/bin/bash
 exec /usr/bin/mono --gc-params=nursery-size=64m $MONO_OPTIONS $1 "\$@"
 EOF
@@ -54,14 +55,14 @@ check_and_echo() {
 find_targets() {
     local f
     check_and_echo "${EROOT}/usr/lib/mono/4.5/csc.exe" "${EROOT}/usr/lib/mono/4.5/csc.exe"
-    for f in "${EROOT}"/usr/x86_64-msbin-roslyn/*/csc.exe; do
+    for f in "${EROOT}"${INSTALL_PATH}/*/csc.exe; do
         check_and_echo "${f}" "${f}"
     done
 }
 
 # remove the wrapper
 remove_target() {
-    rm "${EROOT}${CSC_PATH}"
+    rm "${EROOT}${WRAPPER_NAME}"
 }
 
 # create new record
@@ -87,8 +88,8 @@ describe_show() {
 
 do_show() {
     write_list_start "Current selection:"
-    if [[ -L ${EROOT}${CSC_PATH} ]]; then
-        local version=$(canonicalise "${EROOT}${CSC_PATH}")
+    if [[ -L ${EROOT}${WRAPPER_NAME} ]]; then
+        local version=$(canonicalise "${EROOT}${WRAPPER_NAME}")
         write_kv_list_entry "${version%/}" ""
     else
         write_kv_list_entry "(unset)" ""
@@ -103,7 +104,7 @@ describe_list() {
 
 do_list() {
     local i targets=( $(find_targets) )
-    local curtar="$(find_current_target ${CSC_PATH})"
+    local curtar="$(find_current_target ${WRAPPER_NAME})"
 
     write_list_start "Available msbuild symlink targets:"
     for (( i = 0; i < ${#targets[@]}; i++ )); do
