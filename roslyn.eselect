@@ -13,7 +13,7 @@ CSC_PATH=/usr/bin/csc
 
 # create the wrapper
 make_wrapper() {
-	cat << EOF > #{CSC_PATH}
+	cat << EOF > ${CSC_PATH}
 #!/bin/bash
 exec /usr/bin/mono --gc-params=nursery-size=64m $MONO_OPTIONS $1 "\$@"
 EOF
