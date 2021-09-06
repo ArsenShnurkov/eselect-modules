@@ -5,7 +5,7 @@ DESCRIPTION="Manage the /usr/local/bin/csc script"
 VERSION="202100906"
 MAINTAINER="dotnet@gentoo.org"
 
-CSC_PATH=/usr/local/bin/csc
+CSC_PATH=/usr/bin/csc
 
 # $ cat /usr/bin/csc
 # #!/bin/sh
